@@ -1,0 +1,46 @@
+%%[
+    SET @jsonPayload = '{
+        "order": {
+            "orderNumber": "123456789",
+            "customerName": "John Doe",
+            "products": [
+                {
+                    "name": "Product A",
+                    "price": 19.99,
+                    "quantity": 2
+                },
+                {
+                    "name": "Product B",
+                    "price": 29.99,
+                    "quantity": 1
+                }
+            ]
+        }
+    }'
+
+    SET @products = BuildRowsetFromJSON(@jsonPayload, 'order.products')
+]%%
+
+<html>
+    <body>
+        <h1>Order Confirmation</h1>
+        <p>Thank you for your order, %%=v(Field(Row(@products, 1), 'customerName'))=%%!</p>
+        <p>Here are the details of your order:</p>
+        <table>
+            <tr>
+                <th>Product</th>
+                <th>Price</th>
+                <th>Quantity</th>
+            </tr>
+            %%[ FOR @i = 1 TO RowCount(@products) DO
+                SET @product = Row(@products, @i)
+            ]%%
+            <tr>
+                <td>%%=v(Field(@product, 'name'))=%%</td>
+                <td>%%=v(Field(@product, 'price'))=%%</td>
+                <td>%%=v(Field(@product, 'quantity'))=%%</td>
+            </tr>
+            %%[ NEXT @i ]%%
+        </table>
+    </body>
+</html>
